@@ -51,7 +51,7 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-1.5-flash-latest",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -62,13 +62,13 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
         console.log("AI Service - Response received")
         return JSON.parse(response.text)
     } catch (error) {
-        console.error("AI Service Error with gemini-1.5-flash:", error)
+        console.error("AI Service Error with gemini-1.5-flash-latest:", error)
         
-        // Fallback to gemini-pro
+        // Fallback to gemini-pro-latest
         try {
-            console.log("Trying fallback model: gemini-pro")
+            console.log("Trying fallback model: gemini-pro-latest")
             const response = await ai.models.generateContent({
-                model: "gemini-pro",
+                model: "gemini-pro-latest",
                 contents: prompt,
                 config: {
                     responseMimeType: "application/json",
@@ -80,11 +80,11 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
         } catch (fallbackError) {
             console.error("AI Service Fallback Error:", fallbackError)
             
-            // Final fallback to gemini-1.0-pro
+            // Final fallback to text-bison (working model)
             try {
-                console.log("Trying final fallback: gemini-1.0-pro")
+                console.log("Trying final fallback: text-bison")
                 const response = await ai.models.generateContent({
-                    model: "gemini-1.0-pro",
+                    model: "text-bison",
                     contents: prompt,
                     config: {
                         responseMimeType: "application/json",
