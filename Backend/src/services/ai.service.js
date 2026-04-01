@@ -3,9 +3,16 @@ const { z } = require("zod")
 const { zodToJsonSchema } = require("zod-to-json-schema")
 const puppeteer = require("puppeteer")
 
+// Initialize Google AI
 const ai = new GoogleGenAI({
     apiKey: process.env.GOOGLE_GENAI_API_KEY || process.env.GEMINI_API_KEY
 })
+
+// Initialize OpenAI as backup
+const OpenAI = require("openai")
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+}) : null
 
 const interviewReportSchema = z.object({
     matchScore: z.number().describe("A score between 0 and 100 indicating how well the candidate's profile matches the job describe"),
@@ -72,7 +79,24 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
             return JSON.parse(response.text)
         } catch (fallbackError) {
             console.error("AI Service Fallback Error:", fallbackError)
-            throw new Error("Failed to generate AI report: " + fallbackError.message)
+            
+            // Final fallback to gemini-1.0-pro
+            try {
+                console.log("Trying final fallback: gemini-1.0-pro")
+                const response = await ai.models.generateContent({
+                    model: "gemini-1.0-pro",
+                    contents: prompt,
+                    config: {
+                        responseMimeType: "application/json",
+                        responseSchema: zodToJsonSchema(interviewReportSchema),
+                    }
+                })
+                console.log("AI Service - Final fallback response received")
+                return JSON.parse(response.text)
+            } catch (finalError) {
+                console.error("AI Service Final Error:", finalError)
+                throw new Error("All AI models failed. Please check API key and model availability.")
+            }
         }
     }
 }
