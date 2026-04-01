@@ -53,51 +53,13 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
         const response = await ai.models.generateContent({
             model: "gemini-1.5-flash-latest",
             contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: zodToJsonSchema(interviewReportSchema),
-            }
         })
 
         console.log("AI Service - Response received")
         return JSON.parse(response.text)
     } catch (error) {
         console.error("AI Service Error with gemini-1.5-flash-latest:", error)
-        
-        // Fallback to gemini-pro-latest
-        try {
-            console.log("Trying fallback model: gemini-pro-latest")
-            const response = await ai.models.generateContent({
-                model: "gemini-pro-latest",
-                contents: prompt,
-                config: {
-                    responseMimeType: "application/json",
-                    responseSchema: zodToJsonSchema(interviewReportSchema),
-                }
-            })
-            console.log("AI Service - Fallback response received")
-            return JSON.parse(response.text)
-        } catch (fallbackError) {
-            console.error("AI Service Fallback Error:", fallbackError)
-            
-            // Final fallback to text-bison (working model)
-            try {
-                console.log("Trying final fallback: text-bison")
-                const response = await ai.models.generateContent({
-                    model: "text-bison",
-                    contents: prompt,
-                    config: {
-                        responseMimeType: "application/json",
-                        responseSchema: zodToJsonSchema(interviewReportSchema),
-                    }
-                })
-                console.log("AI Service - Final fallback response received")
-                return JSON.parse(response.text)
-            } catch (finalError) {
-                console.error("AI Service Final Error:", finalError)
-                throw new Error("All AI models failed. Please check API key and model availability.")
-            }
-        }
+        throw new Error("AI service failed: " + error.message)
     }
 }
 
