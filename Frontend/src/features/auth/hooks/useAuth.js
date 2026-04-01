@@ -15,6 +15,13 @@ export const useAuth = () => {
         try {
             const data = await login({ email, password })
             setUser(data.user)
+            
+            // Save token to localStorage as backup
+            // Note: In production, token should be set via HTTP-only cookie
+            // This is just a fallback for cross-origin issues
+            if (data.token) {
+                localStorage.setItem("token", data.token)
+            }
         } catch (err) {
 
         } finally {
@@ -27,6 +34,11 @@ export const useAuth = () => {
         try {
             const data = await register({ username, email, password })
             setUser(data.user)
+            
+            // Save token to localStorage as backup
+            if (data.token) {
+                localStorage.setItem("token", data.token)
+            }
         } catch (err) {
 
         } finally {
@@ -39,6 +51,9 @@ export const useAuth = () => {
         try {
             const data = await logout()
             setUser(null)
+            
+            // Clear token from localStorage
+            localStorage.removeItem("token")
         } catch (err) {
 
         } finally {
