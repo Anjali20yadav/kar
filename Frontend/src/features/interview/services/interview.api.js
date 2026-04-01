@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
     
-    baseURL: "https://kar-e59s.onrender.com",
+    baseURL: "https://kar-e59s.onrender.com",  // Backend URL (Render)
     withCredentials: true
 })
 
