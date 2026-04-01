@@ -55,8 +55,25 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
         console.log("AI Service - Response received")
         return JSON.parse(response.text)
     } catch (error) {
-        console.error("AI Service Error:", error)
-        throw new Error("Failed to generate AI report: " + error.message)
+        console.error("AI Service Error with gemini-1.5-flash:", error)
+        
+        // Fallback to gemini-pro
+        try {
+            console.log("Trying fallback model: gemini-pro")
+            const response = await ai.models.generateContent({
+                model: "gemini-pro",
+                contents: prompt,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: zodToJsonSchema(interviewReportSchema),
+                }
+            })
+            console.log("AI Service - Fallback response received")
+            return JSON.parse(response.text)
+        } catch (fallbackError) {
+            console.error("AI Service Fallback Error:", fallbackError)
+            throw new Error("Failed to generate AI report: " + fallbackError.message)
+        }
     }
 }
 
@@ -101,7 +118,7 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
                     `
 
     const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+        model: "gemini-1.5-flash",
         contents: prompt,
         config: {
             responseMimeType: "application/json",
